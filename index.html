@@ -100,6 +100,12 @@ button.active{background:#781f29;border-color:var(--gold)}
 .fill{height:100%;background:linear-gradient(90deg,#a5a5a5,#d6ad54);width:0}
 .small{font-size:10px;color:#999}
 #musicBtn{position:absolute;right:10px;bottom:8px;z-index:25;padding:6px 8px;font-size:11px}
+#marekSprite{position:absolute;left:43%;top:82%;width:34px;height:68px;z-index:22;transform:translate(-50%,-100%);transition:left .5s linear,top .5s linear;pointer-events:none;filter:drop-shadow(3px 3px 0 #000)}
+#marekSprite .head{position:absolute;left:9px;top:0;width:16px;height:17px;background:#b87b56;box-shadow:0 -5px 0 #29201b}
+#marekSprite .body{position:absolute;left:5px;top:17px;width:24px;height:31px;background:#525b61;box-shadow:-5px 7px 0 #b87b56,24px 7px 0 #b87b56}
+#marekSprite .leg{position:absolute;top:48px;width:8px;height:20px;background:#202429}.leg.a{left:6px}.leg.b{right:6px}
+#marekSprite.walk{animation:bob .15s infinite alternate}@keyframes bob{to{transform:translate(-50%,-104%)}}
+#yuriSprite{position:absolute;left:84%;top:78%;z-index:21;background:#344038;color:#d0a74d;padding:5px;border:2px solid #161b18;font-size:9px;transform:rotate(7deg)}
 #vomitFX{
  position:absolute;z-index:24;width:90px;height:18px;border-radius:50%;
  background:#9a8d45;opacity:0;pointer-events:none;transform:rotate(8deg)
@@ -131,7 +137,9 @@ button.active{background:#781f29;border-color:var(--gold)}
     <button id="musicBtn" type="button">♫</button>
     <div id="vomitFX"></div>
 
-    <div id="cinema"><div id="cinemaText"></div></div>
+    <div id="marekSprite"><i class="head"></i><i class="body"></i><i class="leg a"></i><i class="leg b"></i></div>
+<div id="yuriSprite">YURI</div>
+<div id="cinema"><div id="cinemaText"></div></div>
 
     <div id="intro">
       <h1>BLOK <span>17</span></h1>
@@ -177,8 +185,11 @@ button.active{background:#781f29;border-color:var(--gold)}
 const verbs=['MIRAR','HABLAR','COGER','BEBER','VOMITAR','USAR','COMBINAR'];
 let verb='MIRAR', booze=0, stomach=0, selected=null;
 let inventory=['17 monedas','Botella vacía'];
+let coins=17;
 let started=false;
-let flags={poster:false, beer:false, talkedGop:false, door:false, vomitDone:false};
+let flags={poster:false, beer:false, talkedGop:false, door:false, vomitDone:false,
+firstBeer:false,sausage:false,dogDistracted:false,yuriBeer:false,matches:false,
+gopsSmoking:false,ladaBeer:false,contest:false,portalKey:false,entered:false};
 
 const dialog=document.getElementById('dialog');
 const speaker=document.getElementById('speaker');
@@ -198,7 +209,8 @@ function drawHUD(){
     const b=document.createElement('button');b.textContent=x;b.onclick=()=>itemClick(x);inv.appendChild(b);
   });
   const state=['SOBRIO','CONTENTO','COCIDO','DESTRUIDO','INTERNACIONAL'][Math.min(4,booze)];
-  document.getElementById('status').innerHTML='<b>ESTADO</b><br>'+state+'<br>Estómago: '+stomach+'/3';
+  const beerCount=inventory.filter(x=>x==='Cerveza Cosmonauta').length;
+  document.getElementById('status').innerHTML='<b>ESTADO</b><br>'+state+'<br>Estómago: '+stomach+'/3<br>Monedas: '+coins+'<br>Cosmonauta: '+beerCount;
   document.getElementById('alcoholBar').style.width=(booze*25)+'%';
   document.getElementById('objectiveText').textContent=
     flags.poster ? 'Consigue entrar en el BLOK 17 y averigua quién subió al tejado.' : 'Averigua por qué van a demoler el BLOK 17.';
@@ -246,7 +258,9 @@ function itemClick(x){
 }
 
 function drink(){
-  booze=Math.min(4,booze+1);stomach=Math.min(3,stomach+1);drawHUD();
+  const i=inventory.indexOf('Cerveza Cosmonauta');
+  if(i<0){showDialog('MAREK','«Necesito una cerveza.»');return}
+  inventory.splice(i,1);booze=Math.min(4,booze+1);stomach=Math.min(3,stomach+1);drawHUD();
   showDialog('MAREK','*glup* «Sabe a decisiones equivocadas.»');
 }
 
@@ -266,30 +280,46 @@ function interact(name){
   if(!started)return;
 
   if(name==='market'){
-    if(verb==='MIRAR')showDialog('MAREK','«MARKET 24. Abierto 26 horas al día, según Petrov.»');
+    if(verb==='MIRAR')showDialog('MAREK','«MARKET 24. Petrov vende comida, tornillos y decisiones equivocadas.»');
     else if(verb==='HABLAR'){
-      showDialog('PETROV','«No vendo alcohol.»<br><br>Marek mira las botellas.',[
-        {label:'Quiero una cerveza.',fn:()=>{
-          if(!flags.beer){flags.beer=true;inventory.push('Cerveza Cosmonauta');drawHUD();showDialog('PETROV','«Decoración. Cinco monedas.»')}
-          else showDialog('PETROV','«Ya tienes una.»')
+      showDialog('PETROV','«No vendo alcohol.»<br>Marek mira las COSMONAUTA.',[
+        {label:'Comprar Cosmonauta (15)',fn:()=>{
+          if(flags.firstBeer){showDialog('PETROV','«Una por persona. Norma nueva.»');return}
+          if(coins<15){showDialog('PETROV','«Te faltan monedas.»');return}
+          coins-=15;flags.firstBeer=true;inventory.push('Cerveza Cosmonauta');drawHUD();showDialog('PETROV','«Quince monedas.»');
         }},
-        {label:'¿Qué pasa con el BLOK 17?',fn:()=>showDialog('PETROV','«Pregúntale al Ayuntamiento. O a alguien que sepa leer.»')}
+        {label:'¿Tienes fuego?',fn:()=>{
+          if(!flags.matches){flags.matches=true;inventory.push('Cerillas MARKET 24');drawHUD();showDialog('PETROV','«Toma. Publicidad.»')}
+          else showDialog('PETROV','«Ya te di cerillas.»');
+        }},
+        {label:'¿Qué pasa con BLOK 17?',fn:()=>showDialog('PETROV','«Demolición. Lunes. Lee el cartel.»')}
       ]);
-    } else showDialog('MAREK','«Petrov me echaría antes de poder intentarlo.»');
+    } else showDialog('MAREK','«Petrov vigila el género.»');
     return;
   }
 
   if(name==='gopniks'){
-    if(verb==='MIRAR')showDialog('MAREK','«Dima, Sergei y Kolya. Su hábitat natural es cualquier superficie horizontal.»');
+    if(verb==='MIRAR')showDialog('MAREK','«Dima, Sergei y Kolya. Tres gopniks y una idea compartida.»');
     else if(verb==='HABLAR'){
-      flags.talkedGop=true;
-      showDialog('DIMA','«Marek. Nos debes dinero.»',[
-        {label:'¿Cuánto?',fn:()=>showDialog('KOLYA','«Perdimos el papel.»')},
-        {label:'¿Visteis quién puso el cartel?',fn:()=>showDialog('DIMA','«Un tipo con abrigo. Entró en el 17. Subió.»')},
-        {label:'¿Competición?',fn:()=>showDialog('SERGEI','«Vomitar más lejos. Tradición.»')}
-      ]);
-    } else if(verb==='VOMITAR')doVomit('gopniks');
-    else showDialog('MAREK','«Eso sería una mala idea.»');
+      let opts=[
+        {label:'¿Quién puso el cartel?',fn:()=>showDialog('DIMA','«Abrigo gris. Entró en el 17. Subió.»')},
+        {label:'Quiero mirar el Lada.',fn:()=>showDialog('SERGEI','«El Lada no se toca.»')}
+      ];
+      if(flags.matches&&!flags.gopsSmoking)opts.push({label:'Tengo fuego.',fn:()=>{
+        flags.gopsSmoking=true;inventory=inventory.filter(x=>x!=='Cerillas MARKET 24');drawHUD();
+        showDialog('SERGEI','«Civilización.»<br>Los tres se apartan a fumar.');
+      }});
+      if(flags.ladaBeer&&!flags.portalKey)opts.push({label:'¿Y esta cerveza?',fn:()=>{
+        flags.contest=true;showDialog('KOLYA','«Mía. Competición: tres cervezas y luego VOMITAR. Si ganas, tu llave.»');
+      }});
+      showDialog('DIMA','«Marek. Nos debes dinero.»',opts);
+    } else if(verb==='VOMITAR'){
+      if(!flags.contest){showDialog('SERGEI','«Sin competición no tiene mérito.»');return}
+      if(stomach<3){showDialog('SERGEI','«Tres cervezas. Reglas.»');return}
+      doVomit('gopniks');
+      if(!flags.portalKey){flags.portalKey=true;inventory.push('Llave del portal');drawHUD();
+        setTimeout(()=>showDialog('KOLYA','«Ganaste.»<br>Recibes la <b>LLAVE DEL PORTAL</b>.'),300);}
+    } else showDialog('MAREK','«Eso sería una mala idea.»');
     return;
   }
 
@@ -301,27 +331,36 @@ function interact(name){
   }
 
   if(name==='lada'){
-    if(verb==='MIRAR')showDialog('MAREK','«Un Lada rojo. Aún conserva algunas piezas originales, probablemente.»');
-    else if(verb==='COGER')showDialog('MAREK','«Entero no.»');
-    else showDialog('MAREK','«Sergei está demasiado cerca.»');
+    if(verb==='MIRAR')showDialog('MAREK',flags.gopsSmoking?'«Hay una COSMONAUTA debajo del asiento.»':'«Sergei vigila el Lada.»');
+    else if(verb==='COGER'){
+      if(!flags.gopsSmoking){showDialog('SERGEI','«Ni se te ocurra.»');return}
+      if(!flags.ladaBeer){flags.ladaBeer=true;inventory.push('Cerveza Cosmonauta');drawHUD();showDialog('MAREK','«Una COSMONAUTA. Kolya me está mirando.»')}
+      else showDialog('MAREK','«Ya la cogí.»');
+    } else showDialog('MAREK','«No.»');
     return;
   }
 
   if(name==='door'){
-    if(verb==='MIRAR')showDialog('MAREK','«Portal 17. El ascensor lleva roto desde una fecha que ya es tradición oral.»');
-    else if(verb==='USAR'&&selected==='Botella vacía')showDialog('MAREK','«No veo cómo una botella va a abrir esto.»');
-    else if(verb==='HABLAR')showDialog('MAREK','«No suelo conversar con arquitectura.»');
-    else {
-      flags.door=true;
-      showDialog('MAREK','«La puerta está abierta. Eso casi me preocupa más.»');
-    }
+    if(verb==='MIRAR')showDialog('MAREK','«Portal 17. Cerrado.»');
+    else if(verb==='USAR'&&selected==='Llave del portal'){
+      flags.entered=true;selected=null;drawHUD();
+      showDialog('NARRADOR','La llave gira.<br><b>CLAC.</b><br>Marek entra en el BLOK 17.',[
+        {label:'ENTRAR',fn:()=>showDialog('CAPÍTULO I','<b>INTERIOR DEL BLOK 17</b><br>Siguiente escenario desbloqueado.')}
+      ]);
+    } else showDialog('MAREK','«Necesito la llave del portal.»');
     return;
   }
 
   if(name==='dumpster'){
-    if(verb==='MIRAR')showDialog('MAREK','«Contenedor municipal. Ecosistema autónomo.»');
-    else if(verb==='COGER')showDialog('MAREK','«Hay un perro. Y el perro ha dicho que no.»');
-    else if(verb==='VOMITAR')doVomit('dumpster');
+    if(verb==='MIRAR')showDialog('MAREK','«Yuri, el Vigilante, duerme junto al contenedor. Tiene una COSMONAUTA en el bolsillo.»');
+    else if(verb==='COGER'){
+      if(!flags.sausage){flags.sausage=true;inventory.push('Salchicha reseca');drawHUD();showDialog('MAREK','«Una salchicha de edad indeterminada.»')}
+      else if(flags.dogDistracted&&!flags.yuriBeer){flags.yuriBeer=true;inventory.push('Cerveza Cosmonauta');drawHUD();showDialog('MAREK','Yuri corre al portal gritando «¡Talibanes!».<br>Marek recoge su COSMONAUTA.')}
+      else showDialog('MAREK','«Nada útil ahora.»');
+    } else if(verb==='USAR'&&selected==='Salchicha reseca'){
+      flags.dogDistracted=true;inventory=inventory.filter(x=>x!=='Salchicha reseca');selected=null;drawHUD();
+      showDialog('NARRADOR','Marek lanza la salchicha al contenedor. El perro salta. La tapa cae.<br><br>YURI: «¡TALIBANES!»');
+    } else if(verb==='VOMITAR')doVomit('dumpster');
     else showDialog('MAREK','«No.»');
     return;
   }
@@ -334,13 +373,26 @@ function interact(name){
 }
 
 document.getElementById('startBtn').onclick=start;
-document.getElementById('hMarket').onclick=e=>{e.stopPropagation();interact('market')};
-document.getElementById('hGopniks').onclick=e=>{e.stopPropagation();interact('gopniks')};
-document.getElementById('hMarek').onclick=e=>{e.stopPropagation();interact('marek')};
-document.getElementById('hLada').onclick=e=>{e.stopPropagation();interact('lada')};
-document.getElementById('hDoor').onclick=e=>{e.stopPropagation();interact('door')};
-document.getElementById('hDumpster').onclick=e=>{e.stopPropagation();interact('dumpster')};
-document.getElementById('hPoster').onclick=e=>{e.stopPropagation();interact('poster')};
+document.getElementById('hMarket').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('market'),300)};
+document.getElementById('hGopniks').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('gopniks'),300)};
+
+document.getElementById('hLada').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('lada'),300)};
+document.getElementById('hDoor').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('door'),300)};
+document.getElementById('hDumpster').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('dumpster'),300)};
+document.getElementById('hPoster').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('poster'),300)};
+
+function walkMarek(clientX,clientY){
+  if(!started||dialog.style.display==='block')return;
+  const r=document.getElementById('sceneWrap').getBoundingClientRect();
+  let x=(clientX-r.left)/r.width*100, y=(clientY-r.top)/r.height*100;
+  x=Math.max(7,Math.min(94,x)); y=Math.max(67,Math.min(91,y));
+  const m=document.getElementById('marekSprite');m.classList.add('walk');m.style.left=x+'%';m.style.top=y+'%';
+  setTimeout(()=>m.classList.remove('walk'),560);
+}
+document.getElementById('sceneWrap').addEventListener('click',e=>{
+  if(e.target.classList.contains('hot')||e.target.closest('#dialog')||e.target.closest('#intro')||e.target.closest('#cinema')||e.target.tagName==='BUTTON')return;
+  walkMarek(e.clientX,e.clientY);
+});
 
 let audioCtx=null,musicOn=false,musicTimer=null;
 document.getElementById('musicBtn').onclick=e=>{
