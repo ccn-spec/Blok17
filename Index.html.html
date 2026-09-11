@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>BLOK 17 — v0.2</title>
+<style>
+:root{
+  --wine:#6f2a32; --gold:#cbb77b; --ink:#0a0c0d; --panel:#1a1d1f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#070909;color:#eee;font-family:"Courier New",monospace;overflow:hidden}
+body{touch-action:manipulation}
+#game{height:100%;display:flex;flex-direction:column;background:#111}
+#scene{position:relative;flex:1;min-height:0;overflow:hidden;cursor:crosshair;background:#52585a}
+#scene::after{
+ content:""; position:absolute; inset:0; pointer-events:none; z-index:50;
+ background:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 2px,transparent 2px 4px);
+ mix-blend-mode:multiply
+}
+#title{
+ position:absolute;inset:0;background:
+ radial-gradient(circle at 50% 20%,#333 0,#111 45%,#050606 75%);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;text-align:center;padding:24px
+}
+#title h1{font-size:clamp(52px,12vw,130px);margin:0;color:var(--wine);letter-spacing:4px;text-shadow:4px 4px #111,7px 7px #000}
+#title p{color:var(--gold);letter-spacing:4px;margin:6px 0 22px}
+#title .small{font-size:12px;color:#aaa;max-width:650px;margin-bottom:18px}
+button{
+ font-family:inherit;background:#313638;color:#eee;border:1px solid #707679;padding:8px 10px;font-weight:bold;cursor:pointer
+}
+button:hover{filter:brightness(1.15)}
+button.active{background:var(--wine);border-color:var(--gold)}
+#startBtn{font-size:18px;padding:12px 24px}
+
+#dialog{
+ position:absolute;left:50%;bottom:4%;transform:translateX(-50%);
+ width:min(90%,850px);background:rgba(5,6,7,.94);border:2px solid var(--gold);
+ padding:12px 14px;z-index:70;display:none;box-shadow:0 0 0 4px rgba(0,0,0,.4)
+}
+#speaker{color:var(--gold);font-weight:bold;margin-bottom:6px}
+#dialogText{line-height:1.4}
+#choices{margin-top:10px;display:grid;gap:6px}
+.choice{background:#232729;text-align:left}
+
+#hud{
+ height:230px;background:#101213;border-top:4px solid var(--wine);
+ padding:8px;display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:8px;z-index:90
+}
+.panel{border:1px solid #4d5356;background:#1a1d1f;padding:7px;overflow:auto}
+.panelTitle{color:var(--gold);font-weight:bold;margin-bottom:5px}
+#verbs{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+#inventory{display:flex;flex-wrap:wrap;gap:5px}
+#inventory button{font-size:12px}
+#status{font-size:13px;line-height:1.45}
+.meter{height:10px;background:#080909;border:1px solid #555;margin:4px 0 8px}
+.fill{height:100%;background:#b7b7b7;width:0}
+#objective{font-size:12px;color:var(--gold);margin-top:7px}
+#roomName{position:absolute;left:10px;top:8px;z-index:60;background:rgba(0,0,0,.58);padding:6px 9px;border:1px solid #555;color:#ddd}
+#hint{position:absolute;right:10px;top:8px;z-index:60;background:rgba(0,0,0,.58);padding:6px 9px;border:1px solid #555;color:#bbb;font-size:12px}
+#musicBtn{position:absolute;right:10px;bottom:8px;z-index:65}
+
+.hot{position:absolute;z-index:15;cursor:pointer}
+.hot:hover{outline:1px dashed rgba(255,255,255,.35)}
+.building{position:absolute;background:#6c716f;border:4px solid #2b2f30;box-shadow:inset 0 0 60px rgba(0,0,0,.5)}
+.window{position:absolute;width:9%;height:12%;background:#152126;border:3px solid #333}
+.window.lit{background:#d5b66e;box-shadow:0 0 16px rgba(221,190,111,.35)}
+.door{position:absolute;background:#202426;border:4px solid #0c0d0e}
+.snow{position:absolute;bottom:0;height:18%;width:100%;background:#c3c7c3;clip-path:polygon(0 46%,13% 28%,28% 55%,43% 31%,61% 57%,80% 25%,100% 44%,100% 100%,0 100%)}
+.graffiti{position:absolute;color:#64242a;font-size:clamp(18px,3vw,42px);font-weight:bold;transform:rotate(-7deg)}
+.sign{position:absolute;background:#e6d9af;color:#111;border:3px solid #222;padding:6px;font-weight:bold;text-align:center}
+.crt{position:absolute;background:#161819;border:9px solid #4b392c;box-shadow:inset 0 0 18px #000}
+.counter{position:absolute;background:#503d2f;border-top:5px solid #2a211b}
+.shelf{position:absolute;border:3px solid #3e3329;background:#665744}
+.bottle{position:absolute;width:10px;height:28px;background:#6d8448;border:1px solid #111}
+.table{position:absolute;background:#49362a;border:3px solid #241b16}
+.arcade{position:absolute;background:#20252a;border:4px solid #111;border-radius:6px 6px 0 0}
+.arcade::before{content:"COSMO";position:absolute;left:8%;top:8%;width:84%;height:20%;background:#5d1e2c;color:#ddd;text-align:center;padding-top:5px}
+
+.person{
+ position:absolute;width:52px;height:96px;transform:translate(-50%,-100%);
+ z-index:30;transition:left .45s linear,top .45s linear;pointer-events:none
+}
+.person .head{position:absolute;left:14px;top:0;width:24px;height:24px;border-radius:50%;background:#cf9e78;border:2px solid #2a211c}
+.person .body{position:absolute;left:8px;top:22px;width:38px;height:46px;background:#555d62;border:2px solid #242729}
+.person .legs{position:absolute;left:10px;top:65px;width:34px;height:31px;border-left:10px solid #17191a;border-right:10px solid #17191a}
+.person.walking{animation:bob .18s infinite alternate}
+@keyframes bob{to{transform:translate(-50%,-102%)}}
+#marek .body{background:#6d6f75}
+#zofia .body{background:#553c5d}
+#yuri .body{background:#3e4b42}
+#petrov .body{background:#67522d}
+#boris .body{background:#5a2b2c}
+#stanislav .body{background:#353535}
+.gop .body{background:#1d2022}
+
+.itemSprite{position:absolute;z-index:10}
+#toast{
+ position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:80;
+ background:rgba(0,0,0,.9);border:1px solid var(--gold);padding:8px 12px;display:none;max-width:85%;text-align:center
+}
+@media(max-width:780px){
+ #hud{height:275px;grid-template-columns:1fr 1fr}
+ #statusPanel{grid-column:1/3}
+ #dialog{bottom:2%;font-size:14px}
+ .person{transform:translate(-50%,-100%) scale(.88)}
+}
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="scene" onclick="sceneClick(event)">
+    <div id="roomName"></div>
+    <div id="hint">clic en el suelo para mover a Marek</div>
+    <div id="toast"></div>
+    <div id="dialog">
+      <div id="speaker"></div>
+      <div id="dialogText"></div>
+      <div id="choices"></div>
+    </div>
+    <button id="musicBtn" onclick="event.stopPropagation();toggleMusic()">♫ música</button>
+    <div id="title">
+      <h1>BLOK 17</h1>
+      <p>NADIE SALE SOBRIO</p>
+      <div class="small">Aventura gráfica de humor negro. Esta versión incluye movimiento, diálogos, bar COSMOS y el puzle completo del ascensor.</div>
+      <button type="button" id="startBtn" onclick="event.stopPropagation();startGame()">EMPEZAR</button>
+    </div>
+  </div>
+
+  <div id="hud">
+    <div class="panel">
+      <div class="panelTitle">ACCIONES</div>
+      <div id="verbs"></div>
+    </div>
+    <div class="panel">
+      <div class="panelTitle">INVENTARIO</div>
+      <div id="inventory"></div>
+      <div id="objective"></div>
+    </div>
+    <div class="panel" id="statusPanel">
+      <div id="status"></div>
+      <div class="meter"><div class="fill" id="alcohol"></div></div>
+      <small>USAR/COMBINAR permiten seleccionar un objeto del inventario.</small>
+    </div>
+  </div>
+</div>
+
+<script>
+const scene=document.getElementById('scene');
+const dialog=document.getElementById('dialog');
+const speaker=document.getElementById('speaker');
+const dialogText=document.getElementById('dialogText');
+const choices=document.getElementById('choices');
+const toast=document.getElementById('toast');
+
+const verbs=['MIRAR','HABLAR','COGER','USAR','COMBINAR','VOMITAR'];
+let room='bath', verb='MIRAR', selected=null;
+let booze=0, stomach=0, musicOn=false, audioCtx=null, musicTimer=null;
+let inv=['Llave desconocida','17 monedas','Calcetín','Botella vacía'];
+let flags={
+  started:false, poster:false, paper:false, talkedYuri:false,
+  beerTaken:false, gopnikChallenge:false, gopniksGone:false,
+  copper:false, photo:false, vhs:false, button8:false,
+  herring:false, yuriGone:false, stanNeedsCopper:false,
+  repairedBox:false, installedButton:false, elevatorReady:false,
+  chapterDone:false
+};
+
+const roomNames={
+ bath:'Baño de Zofia',
+ hall:'Piso 17-42',
+ stairs:'Escalera / Ascensor',
+ yard:'Patio del BLOK 17',
+ shop:'MARKET 24',
+ bar:'BAR COSMOS',
+ roof:'Tejado del BLOK 17'
+};
+
+function startGame(){
+ document.getElementById('title').style.display='none';
+ flags.started=true;
+ render('bath');
+ showDialog('NARRADOR','Sábado. Probablemente. Marek despierta vestido dentro de una bañera. No recuerda cómo llegó aquí.');
+}
+
+function sceneClick(e){
+ if(!flags.started || dialog.style.display==='block') return;
+ if(e.target!==scene) return;
+ const r=scene.getBoundingClientRect();
+ moveMarek((e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100);
+}
+
+function moveMarek(x,y,cb){
+ const m=document.getElementById('marek');
+ if(!m)return;
+ m.classList.add('walking');
+ m.style.left=Math.max(5,Math.min(95,x))+'%';
+ m.style.top=Math.max(20,Math.min(92,y))+'%';
+ setTimeout(()=>{m.classList.remove('walking'); if(cb)cb()},460);
+}
+
+function showDialog(who,text,opts=[]){
+ speaker.textContent=who;
+ dialogText.innerHTML=text;
+ choices.innerHTML='';
+ opts.forEach(o=>{
+   const b=document.createElement('button');
+   b.className='choice';
+   b.textContent=o.label;
+   b.onclick=(ev)=>{ev.stopPropagation();hideDialog();o.fn()};
+   choices.appendChild(b);
+ });
+ dialog.style.display='block';
+ if(!opts.length){
+   dialog.onclick=(ev)=>{ev.stopPropagation();hideDialog()};
+ } else dialog.onclick=(ev)=>ev.stopPropagation();
+}
+function hideDialog(){dialog.style.display='none';dialog.onclick=null}
+
+function pop(text){
+ toast.textContent=text;toast.style.display='block';
+ clearTimeout(window._toast);window._toast=setTimeout(()=>toast.style.display='none',1600);
+}
+
+function setVerb(v){verb=v;selected=null;drawHUD()}
+function drawHUD(){
+ const vd=document.getElementById('verbs');vd.innerHTML='';
+ verbs.forEach(v=>{
+   const b=document.createElement('button');
+   b.textContent=v;b.className=v===verb?'active':'';
+   b.onclick=()=>setVerb(v);vd.appendChild(b)
+ });
+ const id=document.getElementById('inventory');id.innerHTML='';
+ inv.forEach(x=>{
+   const b=document.createElement('button');b.textContent=x;
+   b.onclick=()=>inventoryClick(x);id.appendChild(b)
+ });
+ const state=['SOBRIO','CONTENTO','COCIDO','DESTRUIDO','INTERNACIONAL'][Math.min(4,booze)];
+ document.getElementById('status').innerHTML='<b>MAREK</b><br>Estado: '+state+'<br>Estómago: '+stomach+'/3';
+ document.getElementById('alcohol').style.width=(booze*25)+'%';
+ let obj='Sal del piso y descubre qué ocurre.';
+ if(flags.poster)obj='Repara el ascensor y llega al tejado.';
+ if(flags.elevatorReady)obj='Usa el ascensor para subir al tejado.';
+ if(flags.chapterDone)obj='CAPÍTULO I COMPLETADO.';
+ document.getElementById('objective').textContent='OBJETIVO: '+obj;
+ document.getElementById('roomName').textContent=roomNames[room]||'';
+}
+
+function inventoryClick(x){
+ if(verb==='USAR'){
+   if(x==='Cerveza Cosmonauta'){
+     booze=Math.min(4,booze+1);stomach=Math.min(3,stomach+1);
+     showDialog('MAREK','*glup* «Esto probablemente cuenta como desayuno.»');
+     drawHUD();return;
+   }
+   selected=x;pop('USAR '+x+' con...');
+ }else if(verb==='COMBINAR'){
+   if(!selected){selected=x;pop('COMBINAR '+x+' con...')}
+   else combine(selected,x);
+ }else{
+   showDialog('MAREK','«Con '+verb.toLowerCase()+' no hago gran cosa con '+x+'.»');
+ }
+}
+
+function combine(a,b){
+ if(a===b){pop('No.');selected=null;return}
+ const pair=[a,b];
+ if(pair.includes('Calcetín') && pair.includes('Periódico')){
+   inv=inv.filter(x=>!['Calcetín','Periódico'].includes(x));
+   inv.push('Calcetín cultural');
+   showDialog('MAREK','«He creado arte contemporáneo. Qué desgracia.»');
+ }else showDialog('MAREK','«Ni siquiera borracho.»');
+ selected=null;drawHUD();
+}
+
+function clearRoom(){
+ [...scene.children].forEach(el=>{
+   if(!['roomName','hint','toast','dialog','musicBtn','title'].includes(el.id))el.remove()
+ });
+}
+function addMarek(x,y){
+ const m=person('marek',x,y);
+ m.style.pointerEvents='none';
+}
+function person(id,x,y,cls=''){
+ const d=document.createElement('div');d.className='person '+cls;d.id=id;
+ d.style.left=x+'%';d.style.top=y+'%';
+ d.innerHTML='<div class="head"></div><div class="body"></div><div class="legs"></div>';
+ scene.appendChild(d);return d
+}
+function hs(name,l,t,w,h,action){
+ const d=document.createElement('div');d.className='hot';
+ d.style.cssText=`left:${l}%;top:${t}%;width:${w}%;height:${h}%;`;
+ d.title=name;d.onclick=(ev)=>{ev.stopPropagation();interact(name,action)};
+ scene.appendChild(d);return d
+}
+
+function renderBase(r){
+ room=r;clearRoom();
+ scene.style.background='#555';
+ if(r==='bath'){
+   scene.style.background='linear-gradient(#9a947e 0 70%,#504941 70%)';
+   const tub=document.createElement('div');
+   tub.style.cssText='position:absolute;left:15%;bottom:12%;width:64%;height:32%;background:#bbb6a4;border:8px solid #777;border-radius:10px 10px 45px 45px';
+   scene.appendChild(tub);
+   addMarek(47,68);
+   hs('espejo',4,10,18,34); hs('puerta',80,15,18,70,'hall');
+ }
+ if(r==='hall'){
+   scene.style.background='linear-gradient(90deg,#706750 0 68%,#3f352d 68%)';
+   const tv=document.createElement('div');tv.className='crt';tv.style.cssText+=';left:7%;bottom:10%;width:19%;height:26%';scene.appendChild(tv);
+   const rug=document.createElement('div');rug.style.cssText='position:absolute;left:34%;top:8%;width:28%;height:35%;background:#7b433b;border:8px solid #4f2b28';scene.appendChild(rug);
+   person('zofia',27,70);
+   addMarek(62,78);
+   hs('Zofia',18,35,20,40);
+   hs('periódico',43,66,15,12);
+   hs('puerta del piso',79,10,19,78,'stairs');
+ }
+ if(r==='stairs'){
+   scene.style.background='linear-gradient(90deg,#414543,#696c66,#3e4240)';
+   const lift=document.createElement('div');lift.className='door';lift.style.cssText+=';left:37%;top:8%;width:27%;height:73%';scene.appendChild(lift);
+   if(!flags.yuriGone)person('yuri',50,73);
+   const box=document.createElement('div');box.style.cssText='position:absolute;left:18%;top:25%;width:12%;height:22%;background:#363b3d;border:3px solid #111';scene.appendChild(box);
+   addMarek(72,82);
+   if(!flags.yuriGone)hs('Yuri',42,36,17,40);
+   hs('ascensor',35,6,31,78);
+   hs('cuadro eléctrico',16,23,16,28);
+   hs('portal',77,58,20,32,'yard');
+ }
+ if(r==='yard'){
+   scene.style.background='linear-gradient(#737e80 0 54%,#393c3b 54%)';
+   const b=document.createElement('div');b.className='building';b.style.cssText='left:4%;top:2%;width:92%;height:58%';scene.appendChild(b);
+   for(let yy=0;yy<3;yy++)for(let xx=0;xx<7;xx++){
+     let w=document.createElement('div');w.className='window'+(((xx+yy*2)%6===0)?' lit':'');
+     w.style.left=(7+xx*13)+'%';w.style.top=(7+yy*28)+'%';b.appendChild(w)
+   }
+   const snow=document.createElement('div');snow.className='snow';scene.appendChild(snow);
+   const sign=document.createElement('div');sign.className='sign';sign.style.cssText+=';left:10%;top:38%;width:18%';sign.textContent='DEMOLICIÓN BLOK 17';scene.appendChild(sign);
+   if(!flags.gopniksGone){
+     ['dima','sergei','kolya'].forEach((n,i)=>person(n,60+i*8,79,'gop'));
+     hs('gopniks',54,50,35,35);
+   }
+   const lada=document.createElement('div');lada.style.cssText='position:absolute;left:30%;bottom:10%;width:25%;height:14%;background:#7e7749;border:4px solid #222;border-radius:12px 18px 4px 4px';scene.appendChild(lada);
+   hs('Lada',28,67,29,20);
+   addMarek(18,83);
+   hs('cartel',9,36,20,25);
+   hs('tienda',2,61,18,28,'shop');
+   hs('bar COSMOS',78,58,20,30,'bar');
+   hs('portal',37,60,17,30,'stairs');
+ }
+ if(r==='shop'){
+   scene.style.background='#665e47';
+   const c=document.createElement('div');c.className='counter';c.style.cssText+=';left:46%;bottom:5%;width:50%;height:30%';scene.appendChild(c);
+   person('petrov',69,61);
+   for(let i=0;i<10;i++){let bt=document.createElement('div');bt.className='bottle';bt.style.left=(9+i*3.4)+'%';bt.style.top=(20+(i%2)*6)+'%';scene.appendChild(bt)}
+   const beer=document.createElement('div');beer.style.cssText='position:absolute;left:17%;top:46%;width:12px;height:30px;background:#7a8a46;border:1px solid #111';scene.appendChild(beer);
+   addMarek(28,82);
+   hs('Petrov',59,30,22,40);
+   hs('cerveza',12,37,15,28);
+   hs('salida',1,62,18,30,'yard');
+ }
+ if(r==='bar'){
+   scene.style.background='linear-gradient(#3f3430 0 66%,#2c2421 66%)';
+   const counter=document.createElement('div');counter.className='counter';counter.style.cssText+=';left:58%;bottom:7%;width:38%;height:34%';scene.appendChild(counter);
+   person('boris',76,62);
+   person('stanislav',39,70);
+   const arcade=document.createElement('div');arcade.className='arcade';arcade.style.cssText+=';left:8%;top:28%;width:18%;height:45%';scene.appendChild(arcade);
+   const table=document.createElement('div');table.className='table';table.style.cssText+=';left:44%;bottom:10%;width:18%;height:8%';scene.appendChild(table);
+   addMarek(22,84);
+   hs('Boris',67,31,20,38);
+   hs('Stanislav',31,38,20,38);
+   hs('máquina recreativa',6,25,22,50);
+   hs('mesa',43,65,21,18);
+   hs('cubo de pescado',83,62,12,17);
+   hs('salida',1,61,18,31,'yard');
+ }
+ if(r==='roof'){
+   scene.style.background='linear-gradient(#37414a 0 65%,#1d2023 65%)';
+   const skyline=document.createElement('div');skyline.style.cssText='position:absolute;left:0;bottom:18%;width:100%;height:28%;background:repeating-linear-gradient(90deg,#262a2d 0 8%,#1a1d1f 8% 12%)';scene.appendChild(skyline);
+   for(let i=0;i<6;i++){let ant=document.createElement('div');ant.style.cssText=`position:absolute;left:${10+i*15}%;bottom:20%;width:2px;height:${18+i%3*7}%;background:#111`;scene.appendChild(ant)}
+   addMarek(28,82);
+   hs('documento',60,62,12,12);
+   hs('borde del tejado',80,48,18,35);
+ }
+ drawHUD();
+}
+
+function interactBase(name,go){
+ if(go){render(go);return}
+
+ if(name==='espejo'){
+   showDialog('MAREK',verb==='MIRAR'?'«Confirmado. Sigo siendo yo. Mala noticia.»':'«El espejo no coopera.»');return;
+ }
+
+ if(name==='Zofia'){
+   if(verb==='HABLAR'){
+     showDialog('ZOFIA','«Hay un Vigilante durmiendo en el ascensor. Y alguien ha pegado un cartel abajo.»',[
+       {label:'¿Un vagabundo?',fn:()=>showDialog('ZOFIA','«Vigilante. Aprende educación.»')},
+       {label:'¿Qué cartel?',fn:()=>showDialog('ZOFIA','«Baja y lee. Para algo tienes piernas.»')},
+       {label:'Dejar conversación',fn:()=>{}}
+     ]);return;
+   }
+   showDialog('MAREK','«Mi abuela. Ella sabe cosas que la policía aún no ha descubierto.»');return;
+ }
+
+ if(name==='periódico' && verb==='COGER'){
+   if(!flags.paper){flags.paper=true;inv.push('Periódico');showDialog('MAREK','«Un periódico. Solo tiene seis años.»');drawHUD()}
+   else pop('Ya lo tienes.');return;
+ }
+
+ if(name==='Yuri'){
+   if(verb==='HABLAR'){
+     flags.talkedYuri=true;
+     showDialog('YURI','«No estoy durmiendo. Estoy vigilando.»',[
+       {label:'¿Qué vigilas?',fn:()=>showDialog('YURI','«El ascensor.»')},
+       {label:'Está roto.',fn:()=>showDialog('YURI','«Por eso sigo teniendo trabajo.»')},
+       {label:'¿Viste quién puso el cartel?',fn:()=>showDialog('YURI','«Vi botas. Subieron al tejado. Después vi dos botas bajar muy deprisa.»')}
+     ]);return;
+   }
+   if(verb==='USAR' && selected==='Arenque'){
+     flags.yuriGone=true;inv=inv.filter(x=>x!=='Arenque');selected=null;
+     showDialog('YURI','«Arma química.»<br>Yuri abandona el ascensor con una dignidad sorprendente.');
+     drawHUD();render('stairs');return;
+   }
+   if(verb==='VOMITAR'){doVomit('Yuri');return}
+   showDialog('MAREK','«Yuri ha perfeccionado el arte de no trabajar.»');return;
+ }
+
+ if(name==='ascensor'){
+   if(flags.elevatorReady){
+     showDialog('MAREK','«Milagro socialista.»',[
+       {label:'Subir al tejado',fn:()=>render('roof')},
+       {label:'Mejor no todavía',fn:()=>{}}
+     ]);return;
+   }
+   let problems=[];
+   if(!flags.yuriGone)problems.push('Yuri está dentro');
+   if(!flags.repairedBox)problems.push('no hay corriente');
+   if(!flags.installedButton)problems.push('falta el botón 8');
+   showDialog('MAREK','«El ascensor no funciona: '+problems.join(', ')+'.»');return;
+ }
+
+ if(name==='cuadro eléctrico'){
+   if(flags.repairedBox){showDialog('MAREK','«Stanislav lo reparó. No quiero saber cómo.»');return}
+   if(verb==='USAR' && selected==='Llave desconocida'){
+     inv=inv.filter(x=>x!=='Llave desconocida');inv.push('Llave rota');
+     selected=null;showDialog('MAREK','*CRACK* «Perfecto. Ahora tengo media llave.»');drawHUD();return;
+   }
+   if(flags.copper && flags.stanNeedsCopper){
+     showDialog('MAREK','«Stanislav dijo que podía arreglarlo si le llevo el cobre.»');return;
+   }
+   showDialog('MAREK','«Cerrado. Y por el olor, también enfadado.»');return;
+ }
+
+ if(name==='cartel'){
+   flags.poster=true;
+   showDialog('MAREK','<b>DEMOLICIÓN BLOK 17 — LUNES 06:00</b><br>Orden administrativa 14/98-B.<br>«Eso parece... inconveniente.»');
+   drawHUD();return;
+ }
+
+ if(name==='gopniks'){
+   if(verb==='HABLAR'){
+     if(!flags.gopnikChallenge){
+       showDialog('DIMA','«Marek. Nos debes dinero.»',[
+         {label:'¿Cuánto?',fn:()=>showDialog('KOLYA','«Perdimos el papel.»')},
+         {label:'Quiero pasar.',fn:()=>showDialog('SERGEI','«Nadie toca el Lada.»')},
+         {label:'¿Alguna competición estúpida?',fn:()=>{flags.gopnikChallenge=true;showDialog('SERGEI','«Vomitar más lejos. Tradición.»')}}
+       ]);
+     }else showDialog('SERGEI','«Cuando estés preparado: VOMITAR.»');
+     return;
+   }
+   if(verb==='VOMITAR'){doVomit('gopniks');return}
+   showDialog('MAREK','«Tres gopniks. Dos pensamientos compartidos.»');return;
+ }
+
+ if(name==='Lada'){
+   if(flags.copper){showDialog('MAREK','«Ya he extraído todo el cobre legalmente discutible.»');return}
+   if(!flags.gopniksGone){showDialog('SERGEI','«Toca el coche y aprendemos anatomía.»');return}
+   if(verb==='USAR' && selected==='Destornillador'){
+     flags.copper=true;inv.push('Cable de cobre');showDialog('MAREK','«Cable de cobre. El Lada ahora vale incluso menos.»');drawHUD();return;
+   }
+   showDialog('MAREK','«Un Lada que ha perdido la fe.»');return;
+ }
+
+ if(name==='Petrov'){
+   if(verb==='HABLAR'){
+     showDialog('PETROV','«No vendo alcohol.»<br>Marek mira las botellas.<br>«Decoración.»',[
+       {label:'¿Tienes una cinta VHS?',fn:()=>{
+         if(flags.photo&&!flags.vhs){flags.vhs=true;inv=inv.filter(x=>x!=='Foto de Petrov con pelo');inv.push('VHS de dibujos');showDialog('PETROV','«Mi juventud... toma la cinta y vete.»');drawHUD()}
+         else if(flags.vhs)showDialog('PETROV','«Ya te la di.»');
+         else showDialog('PETROV','«Sí. Material cultural. Solo la cambio por una foto mía de cuando tenía pelo.»');
+       }},
+       {label:'¿Destornillador?',fn:()=>{
+         if(!inv.includes('Destornillador')){inv.push('Destornillador');showDialog('PETROV','«Me lo devuelves antes de 2004.»');drawHUD()}
+         else showDialog('PETROV','«Ya lo tienes.»')
+       }}
+     ]);return;
+   }
+   showDialog('MAREK','«Petrov parece formar parte del mobiliario.»');return;
+ }
+
+ if(name==='cerveza'){
+   if(!flags.beerTaken && (verb==='COGER'||verb==='USAR')){
+     flags.beerTaken=true;inv.push('Cerveza Cosmonauta');showDialog('MAREK','«COSMONAUTA. Su fecha de caducidad está en otro alfabeto.»');drawHUD();return;
+   }
+   pop(flags.beerTaken?'Ya cogiste una.':'No.');
+   return;
+ }
+
+ if(name==='Stanislav'){
+   if(verb==='HABLAR'){
+     if(flags.copper && flags.stanNeedsCopper && !flags.repairedBox){
+       flags.repairedBox=true;inv=inv.filter(x=>x!=='Cable de cobre');
+       showDialog('STANISLAV','«Perfecto. Cobre auténtico.»<br>Sale hacia el cuadro eléctrico con herramientas que parecen cubiertos.');
+       setTimeout(()=>{drawHUD();checkElevator()},50);return;
+     }
+     showDialog('STANISLAV','«Puedo reparar cualquier cosa excepto mi matrimonio.»',[
+       {label:'El cuadro eléctrico.',fn:()=>{flags.stanNeedsCopper=true;showDialog('STANISLAV','«Necesito cable de cobre. No preguntes cuánto.»')}},
+       {label:'¿Qué haces con esas gafas?',fn:()=>showDialog('STANISLAV','«Protegen de ideas ajenas.»')}
+     ]);return;
+   }
+   showDialog('MAREK','«Stanislav: categoría local de talibán. Nadie sabe qué construye.»');return;
+ }
+
+ if(name==='Boris'){
+   if(verb==='HABLAR'){
+     showDialog('BORIS','«No hay problemas en mi bar.»',[
+       {label:'¿Esa foto debajo de la mesa es de Petrov?',fn:()=>showDialog('BORIS','«Sí. Nivela la mesa. No la toques.»')},
+       {label:'¿Qué hay en el cubo?',fn:()=>showDialog('BORIS','«Pescado. O evidencia. Depende de quién pregunte.»')}
+     ]);return;
+   }
+   showDialog('MAREK','«Boris sonríe como si llevara contabilidad paralela.»');return;
+ }
+
+ if(name==='mesa'){
+   if(flags.photo){showDialog('MAREK','«La mesa ya no contiene secretos históricos.»');return}
+   if(verb==='USAR' && selected==='Calcetín cultural'){
+     inv=inv.filter(x=>x!=='Calcetín cultural');inv.push('Foto de Petrov con pelo');flags.photo=true;selected=null;
+     showDialog('MAREK','«Sustituyo la foto por el calcetín. La mesa queda incluso más estable.»');drawHUD();return;
+   }
+   showDialog('MAREK','«Está coja. Debajo hay una fotografía.»');return;
+ }
+
+ if(name==='máquina recreativa'){
+   if(verb==='VOMITAR'){doVomit('arcade');return}
+   showDialog('MAREK','«COSMO FIGHTER. Lleva años en “INSERT COIN”.»');return;
+ }
+
+ if(name==='cubo de pescado'){
+   if(flags.herring){showDialog('MAREK','«Ya tengo suficiente pescado para arruinar una amistad.»');return}
+   if(flags.arcadeVomit){
+     flags.herring=true;inv.push('Arenque');showDialog('MAREK','«Arenque adquirido. Boris sigue buscando una fregona.»');drawHUD();return;
+   }
+   showDialog('BORIS','«Ni se te ocurra.»');return;
+ }
+
+ if(name==='documento'){
+   flags.chapterDone=true;
+   showDialog('MAREK','Fragmento municipal: <b>PROYECTO EUROPARADISE</b><br>«Así que alguien quiere tirar el BLOK 17 por esto...»');
+   drawHUD();return;
+ }
+
+ if(name==='borde del tejado'){
+   if(booze>=4){
+     showDialog('MAREK','«Puedo saltar.»',[
+       {label:'Saltar',fn:()=>showDialog('NARRADOR','Marek corre, salta... y se queda tres metros corto.<br><br><b>FIN DE LA INTRO v0.2</b>')},
+       {label:'Pensarlo mejor',fn:()=>{}}
+     ]);
+   }else showDialog('MAREK','«Eso no pienso hacerlo sobrio.»');
+   return;
+ }
+}
+
+function doVomit(target){
+ if(stomach<3){showDialog('MAREK','«Todavía no.»');return}
+ stomach=0;booze=Math.max(0,booze-1);
+ if(target==='gopniks' && flags.gopnikChallenge){
+   flags.gopniksGone=true;
+   showDialog('SERGEI','Silencio ceremonial.<br>«Respeto.»<br>Los tres se marchan al COSMOS para discutir el reglamento.');
+   render('yard');
+ } else if(target==='arcade'){
+   flags.arcadeVomit=true;
+   showDialog('BORIS','«¡MAREK!»<br>Boris sale a buscar una fregona. El cubo queda sin vigilancia.');
+ } else if(target==='Yuri'){
+   showDialog('YURI','Abre un ojo.<br>«Profesional.»');
+ } else {
+   showDialog('MAREK','«No ha solucionado nada, pero ahora huele peor.»');
+ }
+ drawHUD();
+}
+
+function checkElevator(){
+ if(flags.repairedBox && flags.installedButton && flags.yuriGone){
+   flags.elevatorReady=true;showDialog('NARRADOR','En algún lugar del edificio, un relé hace <i>clac</i>. El ascensor vuelve a la vida.');drawHUD()
+ }
+}
+
+function toggleMusic(){
+ musicOn=!musicOn;
+ document.getElementById('musicBtn').textContent=musicOn?'♫ música ON':'♫ música';
+ if(musicOn)startMusic();else stopMusic();
+}
+function startMusic(){
+ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+ if(audioCtx.state==='suspended')audioCtx.resume();
+ const play=()=>{
+   if(!musicOn)return;
+   const now=audioCtx.currentTime;
+   [110,146.83,164.81,220].forEach((f,i)=>{
+     const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+     o.type=i%2?'triangle':'sawtooth';o.frequency.value=f;
+     g.gain.setValueAtTime(0.0001,now);
+     g.gain.exponentialRampToValueAtTime(0.025,now+.05);
+     g.gain.exponentialRampToValueAtTime(0.0001,now+.8);
+     o.connect(g).connect(audioCtx.destination);o.start(now+i*.14);o.stop(now+1.2);
+   });
+   musicTimer=setTimeout(play,1200);
+ };
+ play();
+}
+function stopMusic(){clearTimeout(musicTimer)}
+
+document.addEventListener('click',ev=>{
+ if(!flags.started)return;
+ // hidden progression: install button 8 using VHS chain after acquiring VHS
+ if(room==='yard' && inv.includes('VHS de dibujos') && !flags.button8 && ev.target===scene){
+   // intentionally not auto
+ }
+});
+
+function maybeKidTrade(){
+ if(room!=='yard')return;
+ if(inv.includes('VHS de dibujos')&&!flags.button8){
+   flags.button8=true;inv=inv.filter(x=>x!=='VHS de dibujos');inv.push('Botón 8');
+   showDialog('MISHA','«Dibujos.»<br>Misha entrega el botón del ascensor y desaparece antes de que puedas preguntar de dónde lo sacó.');
+   drawHUD();
+ }
+}
+
+// augment scene click on yard: double-click near right-bottom to talk to unseen Misha? better create actual kid hotspot after poster
+function render(r){
+ renderBase(r);
+ if(r==='yard' && flags.poster){
+   person('misha',90,82);
+   hs('Misha',84,52,14,34);
+ }
+ if(r==='stairs' && inv.includes('Botón 8')&&!flags.installedButton){
+   hs('hueco botón 8',60,32,8,20);
+ }
+ drawHUD();
+}
+
+function interact(name,go){
+ if(name==='Misha'){
+   if(inv.includes('VHS de dibujos')&&!flags.button8){
+     flags.button8=true;inv=inv.filter(x=>x!=='VHS de dibujos');inv.push('Botón 8');
+     showDialog('MISHA','«Trato.»<br>Recibes: BOTÓN 8.');drawHUD();return;
+   }
+   showDialog('MISHA','«Quiero dibujos.»');return;
+ }
+ if(name==='hueco botón 8'){
+   if(verb==='USAR' && selected==='Botón 8'){
+     flags.installedButton=true;inv=inv.filter(x=>x!=='Botón 8');selected=null;
+     showDialog('MAREK','«Botón 8 instalado. Ingeniería certificada por nadie.»');drawHUD();checkElevator();return;
+   }
+   showDialog('MAREK','«Aquí falta claramente un 8.»');return;
+ }
+ interactBase(name,go);
+}
+
+
+window.addEventListener('error', function(e){
+  try{
+    const t=document.getElementById('toast');
+    if(t){t.textContent='Error de juego: '+(e.message||'desconocido');t.style.display='block';}
+  }catch(_){}
+});
+
+drawHUD();
+</script>
+</body>
+</html>
