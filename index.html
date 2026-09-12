@@ -100,12 +100,43 @@ button.active{background:#781f29;border-color:var(--gold)}
 .fill{height:100%;background:linear-gradient(90deg,#a5a5a5,#d6ad54);width:0}
 .small{font-size:10px;color:#999}
 #musicBtn{position:absolute;right:10px;bottom:8px;z-index:25;padding:6px 8px;font-size:11px}
-#marekSprite{position:absolute;left:43%;top:82%;width:34px;height:68px;z-index:22;transform:translate(-50%,-100%);transition:left .5s linear,top .5s linear;pointer-events:none;filter:drop-shadow(3px 3px 0 #000)}
-#marekSprite .head{position:absolute;left:9px;top:0;width:16px;height:17px;background:#b87b56;box-shadow:0 -5px 0 #29201b}
-#marekSprite .body{position:absolute;left:5px;top:17px;width:24px;height:31px;background:#525b61;box-shadow:-5px 7px 0 #b87b56,24px 7px 0 #b87b56}
-#marekSprite .leg{position:absolute;top:48px;width:8px;height:20px;background:#202429}.leg.a{left:6px}.leg.b{right:6px}
-#marekSprite.walk{animation:bob .15s infinite alternate}@keyframes bob{to{transform:translate(-50%,-104%)}}
-#yuriSprite{position:absolute;left:84%;top:78%;z-index:21;background:#344038;color:#d0a74d;padding:5px;border:2px solid #161b18;font-size:9px;transform:rotate(7deg)}
+#crateCover{
+ position:absolute;left:39.2%;top:54%;width:8.5%;height:29%;z-index:20;
+ transform:translateX(-50%);pointer-events:none;image-rendering:pixelated
+}
+#crateCover .crate{position:absolute;width:48px;height:28px;background:#51603d;border:4px solid #222a1e;box-shadow:inset 0 0 0 3px #718154}
+#crateCover .c1{left:0;bottom:0}.c2{left:42px;bottom:0}.c3{left:20px;bottom:25px}.c4{left:3px;bottom:50px}.c5{left:45px;bottom:50px}
+#crateCover .label{position:absolute;left:27px;bottom:58px;color:#d9c16a;font-size:10px;font-weight:bold;z-index:2}
+
+#marekSprite{
+ position:absolute;left:51%;top:84%;width:42px;height:82px;z-index:24;
+ transform:translate(-50%,-100%);transition:left .62s linear,top .62s linear;
+ pointer-events:none;filter:drop-shadow(3px 4px 0 rgba(0,0,0,.65));image-rendering:pixelated
+}
+#marekSprite.walk{animation:marekBob .15s infinite alternate}
+@keyframes marekBob{to{transform:translate(-50%,-105%)}}
+#marekSprite .hair{position:absolute;left:10px;top:0;width:23px;height:10px;background:#261d18;box-shadow:-3px 4px 0 #261d18,17px 3px 0 #261d18}
+#marekSprite .head{position:absolute;left:11px;top:7px;width:22px;height:22px;background:#b97c57;border:2px solid #241b17}
+#marekSprite .eye{position:absolute;left:27px;top:14px;width:3px;height:3px;background:#171717;z-index:3}
+#marekSprite .body{position:absolute;left:6px;top:28px;width:31px;height:34px;background:#566149;border:3px solid #20251d}
+#marekSprite .arm{position:absolute;top:31px;width:8px;height:31px;background:#566149;border:2px solid #20251d}
+#marekSprite .arm.l{left:0;transform:rotate(7deg)}#marekSprite .arm.r{right:0;transform:rotate(-7deg)}
+#marekSprite .leg{position:absolute;top:60px;width:10px;height:22px;background:#26394b;border:2px solid #111820}
+#marekSprite .leg.a{left:8px}#marekSprite .leg.b{right:8px}
+
+#yuriSprite{
+ position:absolute;left:82.5%;top:79%;width:74px;height:58px;z-index:23;
+ transform:translate(-50%,-100%) rotate(3deg);pointer-events:none;
+ filter:drop-shadow(3px 3px 0 rgba(0,0,0,.55));image-rendering:pixelated
+}
+#yuriSprite .yHead{position:absolute;left:10px;top:3px;width:19px;height:18px;background:#9f7054;border:2px solid #211915}
+#yuriSprite .yHair{position:absolute;left:8px;top:0;width:24px;height:9px;background:#4b4339;z-index:2;box-shadow:-3px 4px 0 #4b4339}
+#yuriSprite .yBeard{position:absolute;left:12px;top:15px;width:18px;height:10px;background:#5a4d41;z-index:3}
+#yuriSprite .yCoat{position:absolute;left:20px;top:20px;width:39px;height:27px;background:#465247;border:3px solid #202720;transform:rotate(8deg)}
+#yuriSprite .yLeg{position:absolute;top:43px;width:31px;height:10px;background:#33393b;border:2px solid #171a1b}
+#yuriSprite .yLeg.one{left:20px;transform:rotate(12deg)}#yuriSprite .yLeg.two{left:41px;top:48px;transform:rotate(-5deg)}
+#yuriSprite .yBottle{position:absolute;right:4px;top:17px;width:7px;height:23px;background:#74572e;border:2px solid #241b13;border-top:4px solid #c5b05a}
+
 #vomitFX{
  position:absolute;z-index:24;width:90px;height:18px;border-radius:50%;
  background:#9a8d45;opacity:0;pointer-events:none;transform:rotate(8deg)
@@ -137,8 +168,21 @@ button.active{background:#781f29;border-color:var(--gold)}
     <button id="musicBtn" type="button">♫</button>
     <div id="vomitFX"></div>
 
-    <div id="marekSprite"><i class="head"></i><i class="body"></i><i class="leg a"></i><i class="leg b"></i></div>
-<div id="yuriSprite">YURI</div>
+    <div id="crateCover" aria-hidden="true">
+      <span class="crate c1"></span><span class="crate c2"></span><span class="crate c3"></span>
+      <span class="crate c4"></span><span class="crate c5"></span>
+      <span class="label">PIVO</span>
+    </div>
+    <div id="marekSprite" aria-label="Marek">
+      <i class="hair"></i><i class="head"></i><i class="eye"></i>
+      <i class="body"></i><i class="arm l"></i><i class="arm r"></i>
+      <i class="leg a"></i><i class="leg b"></i>
+    </div>
+    <div id="yuriSprite" aria-label="Yuri, Vigilante">
+      <i class="yHair"></i><i class="yHead"></i><i class="yBeard"></i>
+      <i class="yCoat"></i><i class="yLeg one"></i><i class="yLeg two"></i>
+      <i class="yBottle"></i>
+    </div>
 <div id="cinema"><div id="cinemaText"></div></div>
 
     <div id="intro">
@@ -151,10 +195,10 @@ button.active{background:#781f29;border-color:var(--gold)}
 
     <div class="hot" id="hMarket" style="left:0%;top:42%;width:23%;height:40%"></div>
     <div class="hot" id="hGopniks" style="left:20%;top:56%;width:23%;height:31%"></div>
-    <div class="hot" id="hMarek" style="left:38%;top:54%;width:12%;height:33%"></div>
-    <div class="hot" id="hLada" style="left:43%;top:61%;width:25%;height:23%"></div>
+        <div class="hot" id="hLada" style="left:43%;top:61%;width:25%;height:23%"></div>
     <div class="hot" id="hDoor" style="left:64%;top:46%;width:13%;height:31%"></div>
     <div class="hot" id="hDumpster" style="left:75%;top:53%;width:18%;height:28%"></div>
+    <div class="hot" id="hYuri" style="left:77%;top:63%;width:10%;height:18%"></div>
     <div class="hot" id="hPoster" style="left:88%;top:43%;width:9%;height:22%"></div>
   </div>
 
@@ -213,7 +257,7 @@ function drawHUD(){
   document.getElementById('status').innerHTML='<b>ESTADO</b><br>'+state+'<br>Estómago: '+stomach+'/3<br>Monedas: '+coins+'<br>Cosmonauta: '+beerCount;
   document.getElementById('alcoholBar').style.width=(booze*25)+'%';
   document.getElementById('objectiveText').textContent=
-    flags.poster ? 'Consigue entrar en el BLOK 17 y averigua quién subió al tejado.' : 'Averigua por qué van a demoler el BLOK 17.';
+    flags.portalKey ? 'Usa la llave y entra en el BLOK 17.' : (flags.poster ? 'Consigue las tres COSMONAUTA y recupera tu llave.' : 'Averigua por qué van a demoler el BLOK 17.');
 }
 
 function showDialog(who,text,opts=[]){
@@ -239,6 +283,8 @@ function cinema(lines,i=0){
 
 function start(){
   document.getElementById('intro').style.display='none';
+  document.getElementById('marekSprite').style.left='51%';
+  document.getElementById('marekSprite').style.top='84%';
   cinema([
     'NOVIGRADEK · 1998',
     'BARRIO NOVI GRAD',
@@ -351,15 +397,39 @@ function interact(name){
     return;
   }
 
+  if(name==='yuri'){
+    if(verb==='MIRAR'){
+      showDialog('MAREK','«Yuri. Vigilante del barrio. Técnicamente está durmiendo; profesionalmente está de servicio.»');
+    } else if(verb==='HABLAR'){
+      if(flags.dogDistracted) showDialog('YURI','Desde el portal: «¡He oído algo! ¡Talibanes!»');
+      else showDialog('YURI','Sin abrir los ojos: «Vigilante.»<br><br>MAREK: «Estás durmiendo.»<br>YURI: «Vigilancia horizontal.»');
+    } else if(verb==='COGER'){
+      if(flags.dogDistracted&&!flags.yuriBeer){
+        flags.yuriBeer=true;inventory.push('Cerveza Cosmonauta');drawHUD();
+        showDialog('MAREK','«COSMONAUTA número dos.»<br>La botella estaba donde Yuri dormía hace un segundo.');
+      } else if(!flags.dogDistracted) {
+        showDialog('YURI','Sin abrir los ojos: «Estoy dormido, no muerto.»');
+      } else {
+        showDialog('MAREK','«Ya cogí la cerveza.»');
+      }
+    } else if(verb==='VOMITAR'){
+      doVomit('yuri');
+    } else showDialog('MAREK','«Mejor no.»');
+    return;
+  }
+
   if(name==='dumpster'){
-    if(verb==='MIRAR')showDialog('MAREK','«Yuri, el Vigilante, duerme junto al contenedor. Tiene una COSMONAUTA en el bolsillo.»');
+    if(verb==='MIRAR')showDialog('MAREK','«Basura, botellas, una salchicha fósil y un perro con derechos adquiridos.»');
     else if(verb==='COGER'){
-      if(!flags.sausage){flags.sausage=true;inventory.push('Salchicha reseca');drawHUD();showDialog('MAREK','«Una salchicha de edad indeterminada.»')}
-      else if(flags.dogDistracted&&!flags.yuriBeer){flags.yuriBeer=true;inventory.push('Cerveza Cosmonauta');drawHUD();showDialog('MAREK','Yuri corre al portal gritando «¡Talibanes!».<br>Marek recoge su COSMONAUTA.')}
-      else showDialog('MAREK','«Nada útil ahora.»');
+      if(!flags.sausage){
+        flags.sausage=true;inventory.push('Salchicha reseca');drawHUD();
+        showDialog('MAREK','«Una salchicha de edad indeterminada.»');
+      } else showDialog('MAREK','«El perro ha trazado una línea roja.»');
     } else if(verb==='USAR'&&selected==='Salchicha reseca'){
       flags.dogDistracted=true;inventory=inventory.filter(x=>x!=='Salchicha reseca');selected=null;drawHUD();
-      showDialog('NARRADOR','Marek lanza la salchicha al contenedor. El perro salta. La tapa cae.<br><br>YURI: «¡TALIBANES!»');
+      document.getElementById('yuriSprite').style.left='72%';
+      document.getElementById('yuriSprite').style.top='70%';
+      showDialog('NARRADOR','Marek lanza la salchicha dentro del contenedor.<br>El perro salta. La tapa cae con un estruendo.<br><br>YURI: «¡TALIBANES!»<br>El Vigilante se levanta y corre hacia el portal.');
     } else if(verb==='VOMITAR')doVomit('dumpster');
     else showDialog('MAREK','«No.»');
     return;
@@ -373,26 +443,50 @@ function interact(name){
 }
 
 document.getElementById('startBtn').onclick=start;
-document.getElementById('hMarket').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('market'),300)};
-document.getElementById('hGopniks').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('gopniks'),300)};
 
-document.getElementById('hLada').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('lada'),300)};
-document.getElementById('hDoor').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('door'),300)};
-document.getElementById('hDumpster').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('dumpster'),300)};
-document.getElementById('hPoster').onclick=e=>{e.stopPropagation();walkMarek(e.clientX,e.clientY);setTimeout(()=>interact('poster'),300)};
 
-function walkMarek(clientX,clientY){
+function walkMarek(clientX,clientY,callback){
   if(!started||dialog.style.display==='block')return;
-  const r=document.getElementById('sceneWrap').getBoundingClientRect();
-  let x=(clientX-r.left)/r.width*100, y=(clientY-r.top)/r.height*100;
-  x=Math.max(7,Math.min(94,x)); y=Math.max(67,Math.min(91,y));
-  const m=document.getElementById('marekSprite');m.classList.add('walk');m.style.left=x+'%';m.style.top=y+'%';
-  setTimeout(()=>m.classList.remove('walk'),560);
+  const wrap=document.getElementById('sceneWrap');
+  const r=wrap.getBoundingClientRect();
+  let x=(clientX-r.left)/r.width*100;
+  let y=(clientY-r.top)/r.height*100;
+
+  // Playable pavement area.
+  x=Math.max(7,Math.min(94,x));
+  y=Math.max(67,Math.min(91,y));
+
+  const m=document.getElementById('marekSprite');
+  m.classList.add('walk');
+  m.style.left=x+'%';
+  m.style.top=y+'%';
+
+  clearTimeout(window._walkTimer);
+  window._walkTimer=setTimeout(()=>{
+    m.classList.remove('walk');
+    if(callback)callback();
+  },640);
 }
-document.getElementById('sceneWrap').addEventListener('click',e=>{
+
+document.getElementById('sceneWrap').addEventListener('pointerup',e=>{
+  if(!started||dialog.style.display==='block')return;
   if(e.target.classList.contains('hot')||e.target.closest('#dialog')||e.target.closest('#intro')||e.target.closest('#cinema')||e.target.tagName==='BUTTON')return;
   walkMarek(e.clientX,e.clientY);
 });
+
+function walkThenInteract(e,name){
+  e.stopPropagation();
+  walkMarek(e.clientX,e.clientY,()=>interact(name));
+}
+
+
+document.getElementById('hMarket').onclick=e=>walkThenInteract(e,'market');
+document.getElementById('hGopniks').onclick=e=>walkThenInteract(e,'gopniks');
+document.getElementById('hLada').onclick=e=>walkThenInteract(e,'lada');
+document.getElementById('hDoor').onclick=e=>walkThenInteract(e,'door');
+document.getElementById('hDumpster').onclick=e=>walkThenInteract(e,'dumpster');
+document.getElementById('hPoster').onclick=e=>walkThenInteract(e,'poster');
+document.getElementById('hYuri').onclick=e=>walkThenInteract(e,'yuri');
 
 let audioCtx=null,musicOn=false,musicTimer=null;
 document.getElementById('musicBtn').onclick=e=>{
