@@ -4,40 +4,86 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>BLOK 17 · Fase 1</title>
+<title>BLOK 17 · Fase 1 v2</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--red:#d5222c;--gold:#d7b45d;--ink:#061018;--line:#29404d;--txt:#e8edf0}
 html,body{margin:0;height:100%;background:#02070b;color:var(--txt);font-family:"Courier New",monospace;overflow:hidden}
 #game{height:100dvh;display:flex;flex-direction:column;background:#02070b}
-#world{position:relative;flex:1;min-height:0;overflow:hidden;background:#071018}
-#bg{position:absolute;inset:0;background:url("assets/patio.png") center/cover no-repeat;image-rendering:pixelated}
-#title{position:absolute;left:12px;top:calc(10px + env(safe-area-inset-top));z-index:30;font-weight:900;font-size:clamp(22px,4vw,52px);text-shadow:3px 3px #000}
+#viewport{position:relative;flex:1;min-height:0;overflow:hidden;background:#071018}
+#stage{
+  position:absolute;left:0;top:0;height:100%;aspect-ratio:869/296;
+  transform:translateX(0);transition:transform .55s ease;
+  transform-origin:left top;overflow:hidden;
+}
+#bg{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:fill;
+  image-rendering:pixelated;pointer-events:none;user-select:none;
+}
+#title{
+  position:fixed;left:12px;top:calc(9px + env(safe-area-inset-top));z-index:80;
+  font-weight:900;font-size:clamp(20px,4vw,46px);text-shadow:3px 3px #000
+}
 #title b{color:var(--red)}
-#objective{position:absolute;right:10px;top:calc(10px + env(safe-area-inset-top));z-index:30;background:#071018e8;border:2px solid var(--gold);padding:8px 10px;max-width:42%;font-size:11px}
-.actor{position:absolute;z-index:15;transform:translate(-50%,-100%);image-rendering:pixelated;filter:drop-shadow(2px 3px 0 #0008);user-select:none;pointer-events:none}
-#marek{left:34%;top:82%;width:54px;transition:left .65s linear,top .65s linear}
-#marek.walk{animation:bob .14s infinite alternate}@keyframes bob{to{transform:translate(-50%,-105%)}}
-#petrov{left:13%;top:59%;width:52px}
-#dima{left:48%;top:69%;width:46px}
-#sergei{left:55%;top:68%;width:46px}
-#kolya{left:61%;top:69%;width:46px}
-#yuri{left:82%;top:72%;width:55px;transform:translate(-50%,-100%) rotate(5deg)}
-#perro{left:77%;top:79%;width:58px}
-.hot{position:absolute;z-index:20;border-radius:8px}
-#marketHot{left:2%;top:29%;width:23%;height:37%}
-#gopsHot{left:42%;top:48%;width:23%;height:30%}
-#ladaHot{left:50%;top:56%;width:24%;height:22%}
-#yuriHot{left:76%;top:53%;width:12%;height:25%}
-#dumpHot{left:83%;top:52%;width:14%;height:28%}
-#doorHot{left:68%;top:31%;width:13%;height:34%}
-#dialog{position:absolute;z-index:50;left:3%;right:3%;bottom:3%;background:#02070bf2;border:2px solid #d9e0e3;padding:12px;display:none;box-shadow:0 0 0 3px #000}
-#speaker{color:var(--gold);font-weight:900;font-size:16px;margin-bottom:6px}
-#text{font-size:14px;line-height:1.4}
-#choices{display:grid;gap:6px;margin-top:8px}
-button{font:inherit;color:#fff;background:#0b151b;border:1px solid #526773;padding:8px;font-weight:bold}
+#objective{
+  position:fixed;right:9px;top:calc(9px + env(safe-area-inset-top));z-index:80;
+  background:#071018ec;border:2px solid var(--gold);padding:7px 9px;
+  max-width:44%;font-size:10px;box-shadow:2px 2px #000
+}
+.actor{
+  position:absolute;z-index:20;transform:translate(-50%,-100%);
+  image-rendering:pixelated;filter:drop-shadow(2px 3px 0 #0009);
+  user-select:none;pointer-events:none;width:auto
+}
+/* All sizes are relative to the SAME stage height */
+#marek{left:41%;top:88%;height:34%}
+#marek.walk{animation:bob .14s infinite alternate}
+@keyframes bob{to{transform:translate(-50%,-104%)}}
+
+/* Petrov: upper half in the kiosk opening */
+#petrovWrap{
+  position:absolute;left:11.1%;top:25%;width:10%;height:28%;z-index:18;
+  overflow:hidden;pointer-events:none
+}
+#petrov{
+  position:absolute;left:50%;top:8%;height:115%;transform:translateX(-50%);
+  image-rendering:pixelated;filter:drop-shadow(2px 2px 0 #0008)
+}
+
+/* Gopniks deliberately placed LEFT of the Lada */
+#dima{left:30.5%;top:71%;height:32%}
+#sergei{left:35.5%;top:69.5%;height:34%}
+#kolya{left:40.5%;top:71%;height:32%}
+
+/* Yuri next to the dumpster, not on it */
+#yuri{left:78.3%;top:75%;height:35%;transform:translate(-50%,-100%) rotate(3deg)}
+#perro{left:85.0%;top:82%;height:29%}
+
+.hot{position:absolute;z-index:35;border-radius:6px}
+#marketHot{left:1%;top:12%;width:20%;height:51%}
+#gopsHot{left:26%;top:42%;width:19%;height:36%}
+#ladaHot{left:46%;top:42%;width:25%;height:34%}
+#yuriHot{left:73%;top:47%;width:11%;height:34%}
+#dumpHot{left:82%;top:43%;width:13%;height:37%}
+#doorHot{left:69%;top:13%;width:12%;height:49%}
+
+/* visual debug can be enabled by adding class debug to stage */
+#stage.debug .hot{outline:2px dashed #ff0;background:#ff03}
+
+#dialog{
+ position:fixed;z-index:90;left:3%;right:3%;
+ bottom:calc(215px + 2%);background:#02070bf4;border:2px solid #d9e0e3;
+ padding:11px;display:none;box-shadow:0 0 0 3px #000
+}
+#speaker{color:var(--gold);font-weight:900;font-size:15px;margin-bottom:5px}
+#text{font-size:13px;line-height:1.4}
+#choices{display:grid;gap:5px;margin-top:7px}
+button{font:inherit;color:#fff;background:#0b151b;border:1px solid #526773;padding:7px;font-weight:bold}
 button.active{background:#7e1821;border-color:#d6b35c}
-#hud{height:210px;display:grid;grid-template-columns:190px 1fr 220px;gap:7px;padding:7px;background:#02070b;border-top:3px solid #1f3541}
+#hud{
+ height:210px;display:grid;grid-template-columns:190px 1fr 220px;gap:7px;padding:7px;
+ background:#02070b;border-top:3px solid #1f3541;z-index:70
+}
 .panel{border:1px solid #2d4653;background:#061018;padding:7px;overflow:auto}
 #profile{display:flex;gap:8px}
 #portrait{width:76px;height:90px;object-fit:cover;image-rendering:pixelated;border:2px solid #ddd}
@@ -49,89 +95,169 @@ button.active{background:#7e1821;border-color:#d6b35c}
 .item img{max-height:32px;max-width:42px;image-rendering:pixelated;display:block;margin:auto}
 .item span{font-size:8px}
 #status{font-size:12px;line-height:1.5}
-#hint{position:absolute;left:50%;top:16%;transform:translateX(-50%);z-index:60;background:#02070bef;border:1px solid var(--gold);padding:7px 10px;display:none;font-size:12px}
-#intro{position:absolute;inset:0;z-index:100;background:#02070b;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:25px}
+#hint{position:fixed;left:50%;top:15%;transform:translateX(-50%);z-index:95;background:#02070bef;border:1px solid var(--gold);padding:7px 10px;display:none;font-size:11px}
+#intro{position:fixed;inset:0;z-index:120;background:#02070b;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:25px}
 #intro h1{font-size:clamp(52px,15vw,130px);margin:0}#intro h1 b{color:var(--red)}
 #intro p{max-width:620px;color:#a9bac4;line-height:1.5}
 #intro button{font-size:18px;background:#7e1821;border-color:#d6b35c;padding:12px 22px}
+
+/* Mobile portrait: HUD is compact and stage pans horizontally */
 @media(max-width:800px){
- #hud{height:290px;grid-template-columns:145px 1fr}
+ #hud{height:280px;grid-template-columns:135px 1fr}
  #statusPanel{grid-column:1/3}
  #verbs{grid-template-columns:repeat(3,1fr)}
- #objective{font-size:9px;max-width:45%}
- #dialog{bottom:2%}
+ #dialog{bottom:calc(282px + 1%)}
+ #objective{font-size:8px;max-width:43%}
+ #portrait{width:62px;height:75px}
+ #profile{display:block}
+ #profile b{font-size:14px}
+ .small{font-size:9px}
 }
 </style>
 </head>
 <body>
 <div id="game">
- <div id="world">
-  <div id="bg"></div>
-  <div id="title">BLOK <b>17</b></div>
-  <div id="objective"><b>OBJETIVO</b><br><span id="obj">Entra en el BLOK 17.</span></div>
-  <img id="marek" class="actor" src="assets/marek.png">
-  <img id="petrov" class="actor" src="assets/petrov.png">
-  <img id="dima" class="actor" src="assets/dima.png">
-  <img id="sergei" class="actor" src="assets/sergei.png">
-  <img id="kolya" class="actor" src="assets/kolya.png">
-  <img id="yuri" class="actor" src="assets/yuri.png">
-  <img id="perro" class="actor" src="assets/perro.png">
+ <div id="viewport">
+   <div id="stage">
+     <img id="bg" src="assets/patio.png" alt="">
+     <div id="petrovWrap"><img id="petrov" src="assets/petrov.png" alt="Petrov"></div>
+     <img id="marek" class="actor" src="assets/marek.png" alt="Marek">
+     <img id="dima" class="actor" src="assets/dima.png" alt="Dima">
+     <img id="sergei" class="actor" src="assets/sergei.png" alt="Sergei">
+     <img id="kolya" class="actor" src="assets/kolya.png" alt="Kolya">
+     <img id="yuri" class="actor" src="assets/yuri.png" alt="Yuri">
+     <img id="perro" class="actor" src="assets/perro.png" alt="Perro">
 
-  <div id="marketHot" class="hot"></div><div id="gopsHot" class="hot"></div>
-  <div id="ladaHot" class="hot"></div><div id="yuriHot" class="hot"></div>
-  <div id="dumpHot" class="hot"></div><div id="doorHot" class="hot"></div>
-
-  <div id="hint"></div>
-  <div id="dialog"><div id="speaker"></div><div id="text"></div><div id="choices"></div></div>
-  <div id="intro"><h1>BLOK <b>17</b></h1><h2>NOVI GRAD · 1998</h2><p>Marek vuelve al barrio sin recordar gran cosa. La puerta de su propio bloque está cerrada y, como siempre, la solución probablemente empeorará el problema.</p><button id="start">EMPEZAR</button></div>
+     <div id="marketHot" class="hot"></div>
+     <div id="gopsHot" class="hot"></div>
+     <div id="ladaHot" class="hot"></div>
+     <div id="yuriHot" class="hot"></div>
+     <div id="dumpHot" class="hot"></div>
+     <div id="doorHot" class="hot"></div>
+   </div>
  </div>
+
+ <div id="title">BLOK <b>17</b></div>
+ <div id="objective"><b>OBJETIVO</b><br><span id="obj">Entra en el BLOK 17.</span></div>
+ <div id="hint"></div>
+
+ <div id="dialog">
+   <div id="speaker"></div><div id="text"></div><div id="choices"></div>
+ </div>
+
+ <div id="intro">
+   <h1>BLOK <b>17</b></h1>
+   <h2>NOVI GRAD · 1998</h2>
+   <p>Marek vuelve al barrio sin recordar gran cosa. La puerta de su propio bloque está cerrada y, como siempre, la solución probablemente empeorará el problema.</p>
+   <button id="start">EMPEZAR</button>
+ </div>
+
  <div id="hud">
-  <div class="panel"><div id="profile"><img id="portrait" src="assets/marek_portrait.png"><div><b>MAREK</b><div class="small">Resaca: severa.<br>Dignidad: negociable.<br>Motivación: sobrevivir.</div></div></div></div>
+  <div class="panel">
+   <div id="profile">
+    <img id="portrait" src="assets/marek_portrait.png">
+    <div><b>MAREK</b><div class="small">Resaca: severa.<br>Dignidad: negociable.<br>Motivación: sobrevivir.</div></div>
+   </div>
+  </div>
   <div class="panel"><div id="verbs"></div><div id="inventory"></div></div>
   <div class="panel" id="statusPanel"><div id="status"></div></div>
  </div>
 </div>
+
 <script>
+const $=id=>document.getElementById(id);
 const verbs=['MIRAR','HABLAR','COGER','USAR','BEBER','VOMITAR'];
 let verb='MIRAR',selected=null,started=false,coins=17,stomach=0,booze=0;
 let inv=['Botella vacía'];
 let f={beer1:false,matches:false,sausage:false,dog:false,beer2:false,smoking:false,beer3:false,contest:false,key:false,entered:false};
-const $=id=>document.getElementById(id);
+
 function beerCount(){return inv.filter(x=>x==='Cosmonauta').length}
 function render(){
  $('verbs').innerHTML='';
- verbs.forEach(v=>{let b=document.createElement('button');b.textContent=v;b.className=v===verb?'active':'';b.onclick=()=>{verb=v;selected=null;render()};$('verbs').appendChild(b)});
+ verbs.forEach(v=>{
+   const b=document.createElement('button');b.textContent=v;b.className=v===verb?'active':'';
+   b.onclick=()=>{verb=v;selected=null;render()};$('verbs').appendChild(b)
+ });
  $('inventory').innerHTML='';
  const map={'Botella vacía':'','Cosmonauta':'cosmonauta.png','Cerillas':'cerillas.png','Salchicha':'salchicha.png','Llave BLOK 17':'llave.png'};
- inv.forEach((x,i)=>{let b=document.createElement('button');b.className='item';b.innerHTML=(map[x]?`<img src="assets/${map[x]}">`:'')+`<span>${x}</span>`;b.onclick=()=>item(x);$('inventory').appendChild(b)});
+ inv.forEach(x=>{
+   const b=document.createElement('button');b.className='item';
+   b.innerHTML=(map[x]?`<img src="assets/${map[x]}">`:'')+`<span>${x}</span>`;
+   b.onclick=()=>item(x);$('inventory').appendChild(b)
+ });
  const states=['SOBRIO','CONTENTO','COCIDO','DESTRUIDO'];
  $('status').innerHTML=`<b>ESTADO</b><br>${states[Math.min(3,booze)]}<br>Estómago: ${stomach}/3<br>Monedas: ${coins}<br>Cosmonauta: ${beerCount()}`;
  $('obj').textContent=f.key?'Usa la llave y entra en el BLOK 17.':f.contest?'Bebe tres Cosmonauta y gana la competición.':'Entra en el BLOK 17.';
 }
-function say(w,t,opts=[]){$('speaker').textContent=w;$('text').innerHTML=t;$('choices').innerHTML='';opts.forEach(o=>{let b=document.createElement('button');b.textContent=o[0];b.onclick=()=>{hide();o[1]()};$('choices').appendChild(b)});$('dialog').style.display='block';if(!opts.length)$('dialog').onclick=hide;else $('dialog').onclick=null}
+
+function say(w,t,opts=[]){
+ $('speaker').textContent=w;$('text').innerHTML=t;$('choices').innerHTML='';
+ opts.forEach(o=>{const b=document.createElement('button');b.textContent=o[0];b.onclick=()=>{hide();o[1]()};$('choices').appendChild(b)});
+ $('dialog').style.display='block';
+ $('dialog').onclick=opts.length?null:hide;
+}
 function hide(){$('dialog').style.display='none'}
-function hint(t){$('hint').textContent=t;$('hint').style.display='block';clearTimeout(window.ht);window.ht=setTimeout(()=>$('hint').style.display='none',1300)}
-function walk(x,y,cb){if(!started||$('dialog').style.display==='block')return;let m=$('marek');m.classList.add('walk');m.style.left=x+'%';m.style.top=y+'%';clearTimeout(window.wt);window.wt=setTimeout(()=>{m.classList.remove('walk');cb&&cb()},680)}
+function hint(t){$('hint').textContent=t;$('hint').style.display='block';clearTimeout(window.ht);window.ht=setTimeout(()=>$('hint').style.display='none',1200)}
+
+function updateCamera(xPct,instant=false){
+ const vp=$('viewport'),stage=$('stage');
+ const vw=vp.clientWidth, sw=stage.offsetWidth;
+ if(sw<=vw){stage.style.transform='translateX(0px)';return}
+ const target=(xPct/100)*sw-vw*.47;
+ const shift=Math.max(0,Math.min(sw-vw,target));
+ if(instant)stage.style.transition='none';
+ stage.style.transform=`translateX(${-shift}px)`;
+ if(instant){requestAnimationFrame(()=>stage.style.transition='transform .55s ease')}
+}
+
+function walk(x,y,cb){
+ if(!started||$('dialog').style.display==='block')return;
+ x=Math.max(8,Math.min(93,x));y=Math.max(70,Math.min(91,y));
+ const m=$('marek');m.classList.add('walk');m.style.left=x+'%';m.style.top=y+'%';
+ updateCamera(x);
+ clearTimeout(window.wt);
+ window.wt=setTimeout(()=>{m.classList.remove('walk');cb&&cb()},680);
+}
+
 function item(x){
- if(verb==='BEBER'&&x==='Cosmonauta'){let i=inv.indexOf('Cosmonauta');inv.splice(i,1);stomach=Math.min(3,stomach+1);booze=Math.min(3,booze+1);render();say('MAREK','*glup* «Sabe a decisiones equivocadas.»');return}
+ if(verb==='BEBER'&&x==='Cosmonauta'){
+   const i=inv.indexOf('Cosmonauta');inv.splice(i,1);
+   stomach=Math.min(3,stomach+1);booze=Math.min(3,booze+1);
+   render();say('MAREK','*glup* «Sabe a decisiones equivocadas.»');return
+ }
  if(verb==='USAR'){selected=x;hint('USAR '+x+' CON...');return}
  say('MAREK','«Ahora no.»');
 }
+
 function market(){
  if(verb==='MIRAR')return say('MAREK','«MARKET 24. Petrov vende comida, alcohol y soluciones temporales.»');
  if(verb!=='HABLAR')return say('MAREK','«Petrov vigila el género.»');
  say('PETROV','«No vendo alcohol.» Marek mira las botellas.',[
-  ['Comprar Cosmonauta · 15',()=>{if(f.beer1)return say('PETROV','«Una por persona. Norma nueva.»');if(coins<15)return say('PETROV','«Sin dinero no hay economía.»');coins-=15;f.beer1=true;inv.push('Cosmonauta');render();say('PETROV','«Quince monedas. No preguntes qué contiene.»')}],
-  ['¿Tienes fuego?',()=>{if(f.matches)return say('PETROV','«Ya te di cerillas.»');f.matches=true;inv.push('Cerillas');render();say('PETROV','«Publicidad del Market. Arden casi siempre.»')}],
+  ['Comprar Cosmonauta · 15',()=>{
+    if(f.beer1)return say('PETROV','«Una por persona. Norma nueva.»');
+    if(coins<15)return say('PETROV','«Sin dinero no hay economía.»');
+    coins-=15;f.beer1=true;inv.push('Cosmonauta');render();say('PETROV','«Quince monedas. No preguntes qué contiene.»')
+  }],
+  ['¿Tienes fuego?',()=>{
+    if(f.matches)return say('PETROV','«Ya te di cerillas.»');
+    f.matches=true;inv.push('Cerillas');render();say('PETROV','«Publicidad del Market. Arden casi siempre.»')
+  }],
   ['¿Qué pasa con el BLOK 17?',()=>say('PETROV','«La puerta está cerrada. Tu llave la tenía Kolya anoche.»')]
  ]);
 }
+
 function dumpster(){
  if(verb==='MIRAR')return say('MAREK','«Basura, un perro y una salchicha que podría votar.»');
  if(verb==='COGER'&&!f.sausage){f.sausage=true;inv.push('Salchicha');render();return say('MAREK','«Salchicha reseca. Fecha de fabricación: probablemente.»')}
- if(verb==='USAR'&&selected==='Salchicha'){f.dog=true;selected=null;inv=inv.filter(x=>x!=='Salchicha');$('perro').style.left='89%';$('perro').style.top='67%';$('yuri').style.left='72%';$('yuri').style.top='57%';render();return say('NARRADOR','Marek lanza la salchicha al contenedor. El perro salta. La tapa cae.<br><b>¡CLANG!</b><br><br>YURI: «¡TALIBANES!»')}
+ if(verb==='USAR'&&selected==='Salchicha'){
+   f.dog=true;selected=null;inv=inv.filter(x=>x!=='Salchicha');
+   $('perro').style.left='88.5%';$('perro').style.top='70%';
+   $('yuri').style.left='72.5%';$('yuri').style.top='66%';
+   render();return say('NARRADOR','Marek lanza la salchicha al contenedor. El perro salta. La tapa cae.<br><b>¡CLANG!</b><br><br>YURI: «¡TALIBANES!»')
+ }
  say('MAREK','«No.»');
 }
+
 function yuri(){
  if(verb==='MIRAR')return say('MAREK','«Yuri, el Vigilante. Vigilancia horizontal.»');
  if(verb==='HABLAR')return say('YURI',f.dog?'«¡Algo se mueve en el contenedor!»':'«Estoy trabajando.»');
@@ -142,21 +268,31 @@ function yuri(){
  }
  say('MAREK','«Mejor no.»');
 }
+
+function moveGopsToSmoke(){
+ f.smoking=true;selected=null;inv=inv.filter(x=>x!=='Cerillas');
+ $('dima').style.left='22%';$('dima').style.top='67%';
+ $('sergei').style.left='26%';$('sergei').style.top='66%';
+ $('kolya').style.left='30%';$('kolya').style.top='67%';
+ render();
+}
+
 function gops(){
  if(verb==='MIRAR')return say('MAREK','«Dima, Sergei y Kolya. Tres personas, una sola mala influencia.»');
- if(verb==='USAR'&&selected==='Cerillas'&&!f.smoking){f.smoking=true;selected=null;inv=inv.filter(x=>x!=='Cerillas');$('dima').style.left='38%';$('sergei').style.left='42%';$('kolya').style.left='46%';render();return say('SERGEI','«Civilización.» Los tres se apartan a fumar.')}
+ if(verb==='USAR'&&selected==='Cerillas'&&!f.smoking){moveGopsToSmoke();return say('SERGEI','«Civilización.» Los tres se apartan a fumar.')}
  if(verb==='VOMITAR'){
    if(!f.contest)return say('SERGEI','«Sin competición no tiene mérito.»');
    if(stomach<3)return say('SERGEI','«Tres cervezas. Reglas.»');
    stomach=0;booze=Math.max(0,booze-1);f.key=true;inv.push('Llave BLOK 17');render();
-   return say('DIMA','Dima mide la distancia con pasos.<br><br>«Dos metros ochenta y siete.»<br><br>SERGEI: «Récord del barrio.»<br><br>Kolya entrega la llave.');
+   return say('DIMA','Dima mide la distancia con pasos.<br><br>«Dos metros ochenta y siete.»<br><br>SERGEI: «Récord del barrio.»<br><br>Kolya entrega la llave.')
  }
  if(verb!=='HABLAR')return say('MAREK','«Eso acabaría mal.»');
  let opts=[['¿Tenéis mi llave?',()=>say('KOLYA','«La perdiste contra mí anoche.»')]];
- if(f.matches&&!f.smoking)opts.push(['Tengo fuego.',()=>{f.smoking=true;inv=inv.filter(x=>x!=='Cerillas');$('dima').style.left='38%';$('sergei').style.left='42%';$('kolya').style.left='46%';render();say('SERGEI','«Civilización.» Los tres se apartan a fumar.')}]);
+ if(f.matches&&!f.smoking)opts.push(['Tengo fuego.',()=>{moveGopsToSmoke();say('SERGEI','«Civilización.» Los tres se apartan a fumar.')}]);
  if(f.beer3&&!f.contest)opts.push(['¿Y esta cerveza?',()=>{f.contest=true;render();say('KOLYA','«Competición. Tres cervezas. Luego distancia. Si ganas, tu llave.»')}]);
  say('DIMA','«Marek. Nos debes dinero.»',opts);
 }
+
 function lada(){
  if(verb==='MIRAR')return say('MAREK',f.smoking?'«Hay una Cosmonauta debajo del asiento.»':'«Lada rojo. Sergei lo vigila.»');
  if(verb==='COGER'){
@@ -166,15 +302,39 @@ function lada(){
  }
  say('MAREK','«No.»');
 }
+
 function door(){
  if(verb==='MIRAR')return say('MAREK','«Mi propio portal. Cerrado. Magnífico.»');
- if(verb==='USAR'&&selected==='Llave BLOK 17'){f.entered=true;return say('NARRADOR','La llave gira.<br><b>CLAC.</b><br><br>DIMA: «Marek.»<br>MAREK: «¿Qué?»<br>DIMA: «Nos sigues debiendo dinero.»<br><br><b>FASE 1 COMPLETADA</b>')}
+ if(verb==='USAR'&&selected==='Llave BLOK 17'){
+   f.entered=true;return say('NARRADOR','La llave gira.<br><b>CLAC.</b><br><br>DIMA: «Marek.»<br>MAREK: «¿Qué?»<br>DIMA: «Nos sigues debiendo dinero.»<br><br><b>FASE 1 COMPLETADA</b>')
+ }
  say('MAREK','«Necesito mi llave.»');
 }
+
 function bind(id,x,y,fn){$(id).onclick=e=>{e.stopPropagation();walk(x,y,fn)}}
-bind('marketHot',20,78,market);bind('gopsHot',47,80,gops);bind('ladaHot',58,82,lada);bind('yuriHot',78,81,yuri);bind('dumpHot',88,81,dumpster);bind('doorHot',72,76,door);
-$('world').addEventListener('pointerup',e=>{if(e.target.classList.contains('hot')||e.target.closest('#dialog')||e.target.closest('#intro'))return;let r=$('world').getBoundingClientRect();let x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;x=Math.max(8,Math.min(92,x));y=Math.max(70,Math.min(91,y));walk(x,y)});
-$('start').onclick=()=>{$('intro').style.display='none';started=true;say('MAREK','«Tengo la sensación de que hoy va a ser un día largo.»')};
+bind('marketHot',18,82,market);
+bind('gopsHot',36,82,gops);
+bind('ladaHot',56,84,lada);
+bind('yuriHot',77,82,yuri);
+bind('dumpHot',87,82,dumpster);
+bind('doorHot',72,80,door);
+
+$('viewport').addEventListener('pointerup',e=>{
+ if(e.target.classList.contains('hot')||e.target.closest('#dialog')||e.target.closest('#intro'))return;
+ const s=$('stage').getBoundingClientRect();
+ let x=(e.clientX-s.left)/s.width*100;
+ let y=(e.clientY-s.top)/s.height*100;
+ walk(x,y)
+});
+
+$('start').onclick=()=>{
+ $('intro').style.display='none';started=true;
+ updateCamera(41,true);
+ say('MAREK','«Tengo la sensación de que hoy va a ser un día largo.»')
+};
+
+window.addEventListener('resize',()=>updateCamera(parseFloat($('marek').style.left)||41,true));
 render();
 </script>
-</body></html>
+</body>
+</html>
